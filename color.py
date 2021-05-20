@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import cv2
+import numpy as np
 
 def is_white(pixel, cspace='rgb'):
     # Checks if a pixel is white
@@ -24,10 +25,3 @@ def color_info(image):
                 b += pixel[2]
     
     return [r,g,b]
-
-if __name__=="__main__":
-
-    image = cv2.imread(./pics/r1.jpg)
-    plt.imshow(image)
-    total_rgb = color_info(image)
-    print ('Total R: {} G: {} B:{}'.format(total_rgb[0], total_rgb[1], total_rgb[2]))
