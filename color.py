@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import sys
 from PIL import Image
+import argparse
 
 
 def is_white(pixel, cspace='rgb'):
@@ -44,7 +45,7 @@ def color_info(image, normalize=False):
     else:
         return [r/total_color_pixels,g/total_color_pixels,b/total_color_pixels]
 
-def handler(im1_path, im2_path, tolerance = 0.2):
+def handler(im1_path, im2_path, tolerance):
     im1 = cv2.imread(im1_path)
     im1 = cv2.cvtColor(im1,cv2.COLOR_BGR2RGB)
     im2 = cv2.imread(im2_path)
@@ -69,6 +70,7 @@ def handler(im1_path, im2_path, tolerance = 0.2):
     print("Source(Normalized) R: {:.2f}, G:{:.2f}, B:{:.2f}".format(rn1,gn1,bn1))
     print("Sample(Normalized) R: {:.2f}, G:{:.2f}, B:{:.2f}".format(rn2,gn2,bn2))
 
+    """
     print('\n Absolute Comparison:\n')
     print('Deviation of R: {:.2f}'.format(abs(r1-r2)/r1))
     print('Deviation of G: {:.2f}'.format(abs(g1-g2)/g1))
@@ -88,15 +90,32 @@ def handler(im1_path, im2_path, tolerance = 0.2):
         print("Images seem to be of similar color")
     else:
         print("Images cannot be confidently assessed to be of similar color")
+    """
 
-    print('\n Normalized Comparison:\n')
-    print('Deviation of R: {:.2f}'.format(abs(rn1-rn2)/rn1))
-    print('Deviation of G: {:.2f}'.format(abs(gn1-gn2)/gn1))
-    print('Deviation of B: {:.2f}'.format(abs(bn1-bn2)/bn1))
+    rn = abs(rn1-rn2)/rn1
+    gn = abs(gn1-gn2)/gn1
+    bn = abs(bn1-bn2)/bn1
+
+    print('\nNormalized Comparison:\n')
+    print('Deviation of R: {:.2f}'.format(rn))
+    print('Deviation of G: {:.2f}'.format(gn))
+    print('Deviation of B: {:.2f}'.format(bn))
+
+    if rn+gn+bn < tolerance:
+        print('Images seem to be of similar color')
+    else:
+        print('Images cannot be confidently assessed to be of similar color')
+
+
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        handler(sys.argv[1], sys.argv[2])
-    elif len(sys.argv) == 4:
-        handler(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+    
+    parser = argparse.ArgumentParser(description='Process inputs')
+
+    parser.add_argument('source_path', default='', help='Path to source(first) Image')
+    parser.add_argument('sample_path', default='', help='Path to sample(second) Image')
+    parser.add_argument('tolerance', type = float, default=float(0.1), help='Error tolerance')
+    args=parser.parse_args()
+
+    handler(args.source_path, args.sample_path, args.tolerance)
