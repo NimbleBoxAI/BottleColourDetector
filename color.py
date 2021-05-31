@@ -7,6 +7,8 @@ import sys
 from PIL import Image
 import argparse
 
+def clip_top(image):
+    pass
 
 def is_white(pixel, cspace='rgb'):
     # Checks if a pixel is white
@@ -16,9 +18,19 @@ def is_white(pixel, cspace='rgb'):
     elif cspace == 'hsv':
         return np.array_equal(pixel, [0,0,255])
 
-def is_not_too_dark(pixel):
+def is_too_bright(pixel):
+    # Can be implemented to filter out too bright pixels which can skew mean RGB values
+    if pixel[0] < 250 and pixel[1] < 250 and pixel[2] < 250:
+        return False
+    else:
+        return True
+
+def is_too_dark(pixel):
     # Can be implemented to filter out too dark pixels which can skew mean RGB values
-    pass
+    if pixel[0] > 5 and pixel[1] > 5 and pixel[2] > 5:
+        return False
+    else:
+        return True
 
 def color_info(image, normalize=False):
     # Returns mean values of reds, greens and blues in an image
@@ -30,7 +42,7 @@ def color_info(image, normalize=False):
     for row in range(image.shape[0]):
         for col in range(image.shape[1]):
             pixel = image[row][col]
-            if not is_white(pixel,'rgb'):
+            if not is_too_bright(pixel) and not is_too_dark(pixel):
                 total_color_pixels += 1
                 r += pixel[0]
                 g += pixel[1]
@@ -51,10 +63,10 @@ def handler(im1_path, im2_path, tolerance):
     im2 = cv2.imread(im2_path)
     im2 = cv2.cvtColor(im2,cv2.COLOR_BGR2RGB)
 
-    im1 = np.array(Image.fromarray(im1).resize((100,100)))
+    im1 = np.array(Image.fromarray(im1).resize((100,120)))[20:]
     plt.imshow(im1)
     plt.show()
-    im2 = np.array(Image.fromarray(im2).resize((100,100)))
+    im2 = np.array(Image.fromarray(im2).resize((100,120)))[20:]
     plt.imshow(im2)
     plt.show()
 
@@ -70,6 +82,8 @@ def handler(im1_path, im2_path, tolerance):
     print("Source(Normalized) R: {:.2f}, G:{:.2f}, B:{:.2f}".format(rn1,gn1,bn1))
     print("Sample(Normalized) R: {:.2f}, G:{:.2f}, B:{:.2f}".format(rn2,gn2,bn2))
 
+    # The following commented out snippet is for Absolute outputs (not Normalized)
+    
     """
     print('\n Absolute Comparison:\n')
     print('Deviation of R: {:.2f}'.format(abs(r1-r2)/r1))
