@@ -4,24 +4,10 @@ import matplotlib.image as mpimg
 import pickle
 import os
 
-def is_too_bright(pixel):
-    # Filters out too bright pixels which can skew mean RGB values
-    if pixel[0] < 250 and pixel[1] < 250 and pixel[2] < 250:
-        return False
-    else:
-        return True
-
-def is_too_dark(pixel):
-    # Filters out too dark pixels which can skew mean RGB values
-    if pixel[0] > 5 and pixel[1] > 5 and pixel[2] > 5:
-        return False
-    else:
-        return True
-
-def median(in_path, out_path, batch=False, region='center', region_offset=50):
+def median(data_path, out_path, batch=False, region='center', region_offset=50):
 
 	if batch is False:
-		image = mpimg.imread(in_path)
+		image = mpimg.imread(data_path)
 
 		if region == 'whole':
 			selection = image
@@ -38,26 +24,37 @@ def median(in_path, out_path, batch=False, region='center', region_offset=50):
 		return (r_median,g_median,b_median)
 
 	else:
-		median_values = []
-		with os.scandir(in_path) as entries:
-			for entry in entries:
-				if entry.is_file():
-					image = mpimg.imread(f'{in_path}{entry.name}')
+		median_values = {}
+
+		with os.scandir(data_path) as labels:
+			for label in labels:
+
+				if os.path.isdir(label):
+					item_path = data_path + label.name + '/'
+					median_label = []
+
+					with os.scandir(item_path) as items:
+
+						for item in items:
+
+							image = mpimg.imread(f'{item_path}{item.name}')
 
 					
-					if region == 'whole':
-						selection = image
-					elif region == 'center':
-						center = [image.shape[0]//2, image.shape[1]//2]
-						selection = image[center[0] - region_offset : center[0] + region_offset, 
-										  center[1] - region_offset : center[1] + region_offset]
+							if region == 'whole':
+								selection = image
+							elif region == 'center':
+								center = [image.shape[0]//2, image.shape[1]//2]
+								selection = image[center[0] - region_offset : center[0] + region_offset, 
+												  center[1] - region_offset : center[1] + region_offset]
 
 
-					r_median = np.median(selection[:,:,0])
-					g_median = np.median(selection[:,:,1])
-					b_median = np.median(selection[:,:,2])
+							r_median = np.median(selection[:,:,0])
+							g_median = np.median(selection[:,:,1])
+							b_median = np.median(selection[:,:,2])
 
-					median_values.append((r_median,g_median,b_median))
+							median_label.append((r_median,g_median,b_median))
+					
+					median_values[label.name] = median_label
 
 		f = open(out_path,'wb')
 		pickle.dump(median_values, f)
@@ -68,13 +65,13 @@ def median(in_path, out_path, batch=False, region='center', region_offset=50):
 if __name__=='__main__':
 
 	# These parameters can be accepted as arguments
-	in_path = './pics/auto_seg/'
-	out_path = 'medians_center.pkl'
+	data_path = './pics/data/'
+	out_path = 'median_center.pkl'
 	batch = True
 	region = 'center'
 	region_offset = 50
 
-	median(in_path=in_path,
+	median(data_path=data_path,
 			out_path=out_path, 
 			batch=batch, 
 			region=region, 

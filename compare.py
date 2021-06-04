@@ -1,9 +1,10 @@
 import pickle
 import pandas as pd
 
-medians_center = pickle.load(open('median_center.pkl','rb'))
-medians_whole = pickle.load(open('median_whole.pkl','rb'))
+medians = pickle.load(open('median_center.pkl','rb'))
 
-df = pd.DataFrame((medians_center, medians_whole))
-df = df.transpose()
-print(df.head())
+df = pd.DataFrame.from_dict(medians, orient='index').transpose()
+
+df.to_excel('median_color_signatures.xlsx')
+
+print('Comparison exported.')
