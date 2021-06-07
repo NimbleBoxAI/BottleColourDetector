@@ -3,11 +3,15 @@ import numpy as np
 import matplotlib.image as mpimg
 import pickle
 import os
+from PIL import Image
 
 def median(data_path, out_path, batch=False, region='center', region_offset=50):
 
 	if batch is False:
 		image = mpimg.imread(data_path)
+		image = np.array(Image.fromarray(image).resize((100,120)))[20:]
+		plt.imshow(image)
+		plt.show()
 
 		if region == 'whole':
 			selection = image
@@ -16,6 +20,8 @@ def median(data_path, out_path, batch=False, region='center', region_offset=50):
 			selection = image[center[0] - region_offset : center[0] + region_offset, 
 							  center[1] - region_offset : center[1] + region_offset]
 
+		plt.imshow(selection)
+		plt.show()
 
 		r_median = np.median(selection[:,:,0])
 		g_median = np.median(selection[:,:,1])
@@ -38,6 +44,7 @@ def median(data_path, out_path, batch=False, region='center', region_offset=50):
 						for item in items:
 
 							image = mpimg.imread(f'{item_path}{item.name}')
+							image = np.array(Image.fromarray(image).resize((100,120)))[20:]
 
 					
 							if region == 'whole':
@@ -65,11 +72,21 @@ def median(data_path, out_path, batch=False, region='center', region_offset=50):
 if __name__=='__main__':
 
 	# These parameters can be accepted as arguments
+	data_path_single = './pics/data/blue/blue7.jpg'
 	data_path = './pics/data/'
 	out_path = 'median_center.pkl'
 	batch = True
 	region = 'center'
-	region_offset = 50
+	region_offset = 20
+
+	if batch is False:
+		medians = median(data_path=data_path_single,
+							out_path=out_path, 
+							batch=batch, 
+							region=region, 
+							region_offset=region_offset)
+		print(medians)
+
 
 	median(data_path=data_path,
 			out_path=out_path, 
