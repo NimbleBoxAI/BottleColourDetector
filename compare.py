@@ -1,10 +1,10 @@
 import pickle
 import pandas as pd
 
-medians = pickle.load(open('median_center.pkl','rb'))
+pickle_data = pickle.load(open('clustered.pkl','rb'))
 
-df = pd.DataFrame.from_dict(medians, orient='index').transpose()
+df = pd.DataFrame.from_dict(pickle_data, orient='index').transpose()
 
-df.to_excel('median_color_signatures.xlsx')
+df.to_excel('clusters.xlsx')
 
 print('Comparison exported.')
